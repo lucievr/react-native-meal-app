@@ -1,19 +1,122 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Switch, Platform } from 'react-native';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 
-const FiltersScreen = props => {
+import CustomHeaderButton from '../components/HeaderButton';
+import Colors from '../constants/Colors';
+
+const FilterSwitch = props => {
   return (
-    <View style={styles.screen}>
-      <Text>The Filters Screen</Text>
+    <View style={styles.filterContainer}>
+      <Text>{props.label}</Text>
+      <Switch // need to manage state to enable check/uncheck
+        trackColor={{ true: Colors.primary }} // custom color for checked/true
+        thumbColor={Platform.OS === 'android' ? Colors.primary : ''}
+        value={props.state}
+        onValueChange={props.onChange}
+      />
     </View>
   );
+};
+
+const FiltersScreen = props => {
+  const [isGlutenFree, setIsGlutenFree] = useState(false);
+  const [isVegan, setIsVegan] = useState(false);
+  const [isVegetarian, setIsVegetarian] = useState(false);
+  const [isLactoseFree, setIsLactoseFree] = useState(false);
+
+  // by wrapping useCallback around a function declaration and defining the dependencies of the function, 
+  // it ensures that the function is only re-created if its dependencies changed.
+  const saveFilters = useCallback(() => {
+    const appliedFilters = {
+      glutenFree: isGlutenFree,
+      lactoseFree: isLactoseFree,
+      vegan: isVegan,
+      vegetarian: isVegetarian
+    };
+    console.log(appliedFilters);
+  }, [isGlutenFree, isVegan, isVegetarian, isLactoseFree]);
+
+  useEffect(() => {
+    // set params to pass props between component and navigation
+    // setParams causes the component to rebuild (nav prop changes),
+    props.navigation.setParams({ save: saveFilters });
+  }, [saveFilters]);
+
+  return (
+    <View style={styles.screen}>
+      <Text style={styles.title}>Available Filters / Restrictions</Text>
+      <FilterSwitch
+        label='Gluten-Free'
+        state={isGlutenFree}
+        onChange={newValue => setIsGlutenFree(newValue)}
+      />
+      <FilterSwitch
+        label='Vegan'
+        state={isVegan}
+        onChange={newValue => setIsVegan(newValue)}
+      />
+      <FilterSwitch
+        label='Vegetarian'
+        state={isVegetarian}
+        onChange={newValue => setIsVegetarian(newValue)}
+      />
+      <FilterSwitch
+        label='Lactose-Free'
+        state={isLactoseFree}
+        onChange={newValue => setIsLactoseFree(newValue)}
+      />
+    </View>
+  );
+};
+
+FiltersScreen.navigationOptions = navData => {
+  return {
+    headerTitle: 'Filter Meals',
+    headerLeft: () => {
+      return (
+        <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
+          <Item
+            title='Menu'
+            iconName='ios-menu'
+            onPress={() => {
+              navData.navigation.toggleDrawer();
+            }}
+          />
+        </HeaderButtons>
+      );
+    },
+    headerRight: () => {
+      return (
+        <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
+          <Item
+            title='Save'
+            iconName='ios-save'
+            onPress={navData.navigation.getParam('save')}
+          />
+        </HeaderButtons>
+      );
+    }
+  };
 };
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center'
+  },
+  title: {
+    fontFamily: 'open-sans-bold',
+    fontSize: 22,
+    margin: 20,
+    textAlign: 'center'
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '80%',
+    marginVertical: 15
   }
 });
 

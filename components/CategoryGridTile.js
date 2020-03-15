@@ -35,7 +35,12 @@ const styles = StyleSheet.create({
     margin: 15,
     height: 150,
     borderRadius: 10,
-    overflow: 'hidden' // ripple effect doesn't extend outside of the box
+    overflow: Platform.OS === 'android' && Platform.Version >= 21
+      ? 'hidden'
+      : 'visible', 
+    // hidden so that android's ripple effect doesn't extend outside of the box
+    // visible for ios to enable shadow properties below (elevation for android works with hidden)
+    elevation: 5,
   },
   container: {
     flex: 1,
@@ -44,7 +49,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 10,
-    elevation: 3,
     padding: 15,
     justifyContent: 'flex-end',
     alignItems: 'flex-end'
