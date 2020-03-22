@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Switch, Platform } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+import { useDispatch } from 'react-redux';
 
 import CustomHeaderButton from '../components/HeaderButton';
 import Colors from '../constants/Colors';
+import { setFilters } from '../store/actions/meals';
 
 const FilterSwitch = props => {
   return (
@@ -25,7 +27,9 @@ const FiltersScreen = props => {
   const [isVegetarian, setIsVegetarian] = useState(false);
   const [isLactoseFree, setIsLactoseFree] = useState(false);
 
-  // by wrapping useCallback around a function declaration and defining the dependencies of the function, 
+  const dispatch = useDispatch();
+
+  // by wrapping useCallback around a function declaration and defining the dependencies of the function,
   // it ensures that the function is only re-created if its dependencies changed.
   const saveFilters = useCallback(() => {
     const appliedFilters = {
@@ -34,8 +38,8 @@ const FiltersScreen = props => {
       vegan: isVegan,
       vegetarian: isVegetarian
     };
-    console.log(appliedFilters);
-  }, [isGlutenFree, isVegan, isVegetarian, isLactoseFree]);
+    dispatch(setFilters(appliedFilters));
+  }, [isGlutenFree, isVegan, isVegetarian, isLactoseFree, dispatch]);
 
   useEffect(() => {
     // set params to pass props between component and navigation
